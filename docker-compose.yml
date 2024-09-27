@@ -8,8 +8,10 @@ services:
       MYSQL_USER: example_user
       MYSQL_PASSWORD: example_password
     volumes:
-      - ./data:/var/lib/mysql
+      #- ./data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
+      - ./custom-entrypoint.sh:/custom-entrypoint.sh
+    #entrypoint: ["bash", "/custom-entrypoint.sh"]
     ports:
       - "3306:3306"
 
