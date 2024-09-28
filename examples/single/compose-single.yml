@@ -1,12 +1,12 @@
 services:
   mariadb:
-    image: mariadb:latest
-    container_name: mariadb
+    image: mariadb:lts
+    container_name: ${mariadb_container}
     environment:
-      MYSQL_ROOT_PASSWORD: example_root_password
-      MYSQL_DATABASE: example_db
-      MYSQL_USER: example_user
-      MYSQL_PASSWORD: example_password
+      MYSQL_ROOT_PASSWORD: ${db_root_password}
+      MYSQL_DATABASE: ${db_name}
+      MYSQL_USER: ${db_user}
+      MYSQL_PASSWORD: ${db_password}
     volumes:
       #- ./data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
@@ -19,9 +19,10 @@ services:
     image: phpmyadmin:latest
     container_name: phpmyadmin
     environment:
-      PMA_HOST: mariadb
-      PMA_USER: example_user
-      PMA_PASSWORD: example_password
+      PMA_HOST: ${mariadb_container}
+      PMA_DATABASE: ${db_name}
+      PMA_USER: ${db_user}
+      PMA_PASSWORD: ${db_password}
     ports:
       - "8080:80"
     depends_on:
