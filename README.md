@@ -1,6 +1,6 @@
 # POC MariaDB + PHPMyAdmin + Replica
 
-![mariadb-logo](<images/mariadb-logo.png>)
+![landscape](<images/landscape.png>)
 
 ## 🛠️ Comment exécuter l'architecture MariaDB + PHPMyAdmin ?
 
