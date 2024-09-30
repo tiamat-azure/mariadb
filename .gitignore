@@ -3,3 +3,4 @@
 # Ignorer les répertoires data
 data/
 examples/**/data/
+examples/**/data-replica/
