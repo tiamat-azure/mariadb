@@ -34,6 +34,8 @@ services:
     environment:
       - MARIADB_MASTER_HOST=${PRIMARY_name}
       - MARIADB_HEALTHCHECK_GRANTS=REPLICA MONITOR
+    volumes:
+      - ./data-replica:/var/lib/mysql
 
 networks:
   add-replica-nx:
