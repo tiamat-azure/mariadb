@@ -7,9 +7,23 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (username, email) VALUES
-('alice', 'alice@example.com'),
-('toto', 'toto@yahoo.com'),
-('titi', 'titi@yahoo.com'),
-('bob', 'bob@example.com'),
-('charlie', 'charlie@example.com');
+DELIMITER $$
+
+CREATE PROCEDURE generate_users(IN num_users INT)
+BEGIN
+    DECLARE i INT DEFAULT 0;
+    
+    WHILE i < num_users DO
+        INSERT INTO users (username, email)
+        VALUES (
+            CONCAT('user_', FLOOR(RAND() * 1000)),
+            CONCAT('user_', FLOOR(RAND() * 1000), '@yahoo.com')
+        );
+        SET i = i + 1;
+    END WHILE;
+END $$
+
+DELIMITER ;
+
+CALL generate_users(10);
+
