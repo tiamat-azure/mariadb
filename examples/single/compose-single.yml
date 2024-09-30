@@ -12,8 +12,11 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d
       - ./custom-entrypoint.sh:/custom-entrypoint.sh
     #entrypoint: ["bash", "/custom-entrypoint.sh"]
+    command: --log-bin --log-basename=mariadb
     ports:
       - "3306:3306"
+    networks:
+      - single-nx
 
   phpmyadmin:
     image: phpmyadmin:latest
@@ -27,3 +30,10 @@ services:
       - "8080:80"
     depends_on:
       - mariadb
+    networks:
+      - single-nx
+
+networks:
+  single-nx:
+    name: single-nx
+    driver: bridge

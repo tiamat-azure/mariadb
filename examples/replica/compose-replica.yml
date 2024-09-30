@@ -8,6 +8,8 @@ x-common-attributes: &common-attributes
     - .env
   image: mariadb:lts
   environment: *common-variables
+  networks:
+    - replica-nx
   healthcheck:
     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
     start_period: 10s
@@ -34,6 +36,8 @@ services:
       - MARIADB_USER=me
       - MARIADB_PASSWORD=changeit
       - MARIADB_DATABASE=mydb
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
 
   replica1:
     <<:
@@ -56,4 +60,6 @@ services:
       - MARIADB_HEALTHCHECK_GRANTS=REPLICA MONITOR
 
 networks:
-  backend:
+  replica-nx:
+    name: replica-nx
+    driver: bridge
