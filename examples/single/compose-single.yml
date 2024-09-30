@@ -11,8 +11,8 @@ services:
       #- ./data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
       - ./custom-entrypoint.sh:/custom-entrypoint.sh
-    #entrypoint: ["bash", "/custom-entrypoint.sh"]
-    command: --log-bin --log-basename=mariadb
+    # entrypoint: ["bash", "/custom-entrypoint.sh"]
+    # command: --log-bin --log-basename=mariadb
     ports:
       - "3306:3306"
     networks:

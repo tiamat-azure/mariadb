@@ -162,3 +162,136 @@ select * from users;
 +----+----------+-----------------+---------------------+
 2 rows in set (0.001 sec)
 ```
+
+## 🛠️ Comment ajouter un réplica à un MariaDB existant ?
+
+Lancer le GitHub CodeSpace associé à ce projet, aller dans le répertoire `examples/add-replica` puis démarrer le service MariaDB primaire :
+
+```bash
+# Démarrer le service MariaDB primaire
+docker-compose -f compose-master.yml up -d
+
+[+] Running 2/2
+ ✔ Network add-replica-nx     Created   0.1s
+ ✔ Container mariadb-primary  Started   0.6s
+
+# Lister les containers
+docker container ls
+
+CONTAINER ID   IMAGE         COMMAND                  CREATED              STATUS                        PORTS      NAMES
+8f457e18f1fc   mariadb:lts   "docker-entrypoint.s…"   About a minute ago   Up About a minute (healthy)   3306/tcp   mariadb-primary
+```
+
+Vérifier que la base de données primaire est bien initialisée avec des données :
+
+```bash
+# Se connecter au container MariaDB primaire avec le client SQL
+docker exec -it mariadb-primary mariadb mydb -ume -pchangeit
+
+# Requêter la table 'users'
+SELECT * FROM users;
+
++----+----------+--------------------+---------------------+
+| id | username | email              | created_at          |
++----+----------+--------------------+---------------------+
+|  1 | user_612 | user_813@yahoo.com | 2024-09-30 04:30:23 |
+|  2 | user_228 | user_702@yahoo.com | 2024-09-30 04:30:23 |
+|  3 | user_826 | user_26@yahoo.com  | 2024-09-30 04:30:23 |
+|  4 | user_651 | user_176@yahoo.com | 2024-09-30 04:30:23 |
+|  5 | user_930 | user_121@yahoo.com | 2024-09-30 04:30:23 |
++----+----------+--------------------+---------------------+
+5 rows in set (0.001 sec)
+
+# Ajouter 95 utilisateurs supplémentaires
+CALL generate_users(95);
+
+Query OK, 95 rows affected (1.610 sec)
+
+# Quitter le client SQL avec CTRL+D
+```
+
+Vérifier que le compte utilisé pour la réplication est bien créé et configuré :
+
+```bash
+# Se connecter au container MariaDB primaire avec le client SQL sous root
+docker exec -it mariadb-primary mariadb mydb -uroot -pchangeit
+
+# Vérifier l'existence de l'utilisateur 'replicat'
+SELECT user, host 
+FROM mysql.user 
+WHERE user = 'replicat';
+
++----------+------+
+| User     | Host |
++----------+------+
+| replicat | %    |
++----------+------+
+1 row in set (0.001 sec)
+
+# Vérifier ses privilèges
+SHOW GRANTS FOR 'replicat'@'%';
+
++---------------------------------------------------------------------------------------------------------------------+
+| Grants for replicat@%                                                                                               |
++---------------------------------------------------------------------------------------------------------------------+
+| GRANT REPLICATION SLAVE ON *.* TO `replicat`@`%` IDENTIFIED BY PASSWORD '*FC2645EA2511A819C7D7208D9124CDB5818B3D4B' |
++---------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+# Quitter le client SQL avec CTRL+D
+```
+
+Démarrer le service MariaDB secondaire :
+
+```bash
+# Démarrer le service MariaDB secondaire
+docker-compose -f compose-replica.yml up -d
+
+[+] Running 1/1
+ ✔ Container mariadb-replica-1  Started   0.6s
+ ```
+
+Se connecter au container MariaDB secondaire pour vérifier que les données ont bien été répliquées :
+
+```bash
+# Se connecter au container MariaDB secondaire avec le client SQL
+docker exec -it mariadb-replica-1 mariadb mydb -ume -pchangeit
+
+# Requêter la table 'users'
+SELECT * FROM users LIMIT 5;
+
++----+----------+--------------------+---------------------+
+| id | username | email              | created_at          |
++----+----------+--------------------+---------------------+
+|  1 | user_612 | user_813@yahoo.com | 2024-09-30 04:30:23 |
+|  2 | user_228 | user_702@yahoo.com | 2024-09-30 04:30:23 |
+|  3 | user_826 | user_26@yahoo.com  | 2024-09-30 04:30:23 |
+|  4 | user_651 | user_176@yahoo.com | 2024-09-30 04:30:23 |
+|  5 | user_930 | user_121@yahoo.com | 2024-09-30 04:30:23 |
++----+----------+--------------------+---------------------+
+5 rows in set (0.001 sec)
+
+# Compter le nombre d'utilisateurs
+SELECT COUNT(*) AS TOTAL FROM users;
+
++-------+
+| TOTAL |
++-------+
+|   100 |
++-------+
+1 row in set (0.000 sec)
+
+# Quitter le client SQL avec CTRL+D
+```
+
+Pour arrêter les services :
+
+```bash
+docker-compose -f compose-master.yml down
+docker-compose -f compose-replica.yml down
+
+# Vérifier que les containers ont bien été arrêtés et supprimés
+docker container ls -a
+
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+```

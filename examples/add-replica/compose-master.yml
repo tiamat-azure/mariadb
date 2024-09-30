@@ -1,0 +1,35 @@
+x-common-variables: &common-variables
+  MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+  MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
+  MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
+
+x-common-attributes: &common-attributes
+  env_file:
+    - .env
+  image: mariadb:lts
+  environment: *common-variables
+  networks:
+    - add-replica-nx
+  healthcheck:
+    test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+    start_period: 5s
+    interval: 5s
+    timeout: 5s
+    retries: 3
+
+services:
+  master:
+    <<: *common-attributes
+    container_name: ${PRIMARY_name}
+    command: --log-bin --log-basename=mariadb
+    environment:
+      - MARIADB_USER=me
+      - MARIADB_PASSWORD=changeit
+      - MARIADB_DATABASE=mydb
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+
+networks:
+  add-replica-nx:
+    name: add-replica-nx
+    driver: bridge
