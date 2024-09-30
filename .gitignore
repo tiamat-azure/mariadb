@@ -1,4 +1,5 @@
 # .gitignore
 
 # Ignorer les répertoires data
+data/
 examples/**/data/
