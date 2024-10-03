@@ -28,6 +28,7 @@ services:
       - MARIADB_DATABASE=mydb
     volumes:
       - ./initdb:/docker-entrypoint-initdb.d
+      - ./data-master:/var/lib/mysql
 
 networks:
   add-replica-nx:

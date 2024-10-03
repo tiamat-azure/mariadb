@@ -4,3 +4,5 @@
 data/
 examples/**/data/
 examples/**/data-replica/
+examples/**/data-master/
+**/backup.sql
